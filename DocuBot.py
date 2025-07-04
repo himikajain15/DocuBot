@@ -17,12 +17,105 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Streamlit config
-st.set_page_config(page_title="DocTalk: Converse with Websites & PDFs", page_icon="🦜")
-st.title("🦜 DocTalk: Converse with Websites & PDFs")
+st.set_page_config(page_title="DocuBot: Converse with Websites & PDFs", page_icon="🦜")
+st.title("📚🕵️ DocuBot: Converse with Websites & PDFs")
 
-# Sidebar: API key
+# Sidebar: API key and theme toggle
 with st.sidebar:
     groq_api_key = st.text_input("Groq API Key", type="password")
+    dark_mode = st.toggle("🌙 Dark Mode", value=True)
+
+# Inject CSS for dark/light theme
+# Inject custom CSS for dark/light theme
+# THEME FUNCTION: Dark theme (full black)
+def set_theme(dark=True):
+    if dark:
+        st.markdown("""
+            <style>
+                body, .stApp {
+                    background-color: #000000 !important;
+                    color: #ffffff !important;
+                }
+                .block-container {
+                    background-color: #000000 !important;
+                }
+                .stTextInput > div > div > input,
+                .stTextArea > div > textarea,
+                .stTextInput input {
+                    background-color: #1a1a1a !important;
+                    color: #ffffff !important;
+                    border: 1px solid #333333 !important;
+                }
+                .stTextInput label, .stFileUploader label, .stTextArea label {
+                    color: #ffffff !important;
+                }
+                .stButton > button {
+                    background-color: #333333 !important;
+                    color: #ffffff !important;
+                    border: 1px solid #ffffff !important;
+                }
+                section[data-testid="stSidebar"] {
+                    background-color: #000000 !important;
+                    color: #ffffff !important;
+                }
+                div[data-testid="stFileUploader"] > div > div {
+                    background-color: #1a1a1a !important;
+                    color: #ffffff !important;
+                    border: 2px dashed #555 !important;
+                    border-radius: 10px !important;
+                    padding: 1rem !important;
+                }
+                div[data-testid="stFileUploader"] label {
+                    color: #ffffff !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+    else:
+        st.markdown("""
+            <style>
+                body, .stApp {
+                    background-color: #bdbbb0 !important;
+                    color: #353535 !important;
+                }
+                .block-container {
+                    background-color: #bdbbb0 !important;
+                }
+                .stTextInput > div > div > input,
+                .stTextArea > div > textarea,
+                .stTextInput input {
+                    background-color: #ffffff !important;
+                    color: #353535 !important;
+                    border: 1px solid #8a897c !important;
+                }
+                .stTextInput label, .stFileUploader label, .stTextArea label {
+                    color: #353535 !important;
+                }
+                .stButton > button {
+                    background-color: #8a897c !important;
+                    color: #ffffff !important;
+                    border: 1px solid #bdbbb0 !important;
+                }
+                section[data-testid="stSidebar"] {
+                    background-color: #8a897c !important;
+                    color: #ffffff !important;
+                }
+
+
+                div[data-testid="stFileUploader"] > div > div {
+                    background-color: #e4d9ff !important;
+                    color: #1e2749 !important;
+                    border: 2px dashed #1e2749 !important;
+                    border-radius: 10px !important;
+                    padding: 1rem !important;
+                }
+                div[data-testid="stFileUploader"] label {
+                    color: #353535 !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+set_theme(dark_mode)
 
 # Session state setup
 if 'vectorstore' not in st.session_state:
