@@ -2,7 +2,7 @@
 
 **DocuBot** is a conversational assistant that lets you interact with any **PDF document** or **website** using natural language. Just upload a PDF or enter a URL, and DocuBot will read, process, and answer your questions — powered by **LLaMA 4 (via Groq)** and **LangChain**.
 
-![Screenshot](screenshot1.png,screenshot2.png)
+![Screenshot](screenshot2.png)
 
 ---
 
