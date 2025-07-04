@@ -1,43 +1,54 @@
 # 🧠 DocuBot — Chat with PDFs and Websites using LLMs
 
-DocuBot is an interactive AI assistant that allows you to ask questions about **PDF documents** and **web pages** using powerful **Groq-hosted LLaMA-4** models. It parses text from files or URLs, embeds the content using **HuggingFace embeddings**, stores it in a **FAISS vector database**, and answers your queries in real time via an intuitive **Streamlit** UI.
+**DocuBot** is a conversational assistant that lets you interact with any **PDF document** or **website** using natural language. Just upload a PDF or enter a URL, and DocuBot will read, process, and answer your questions — powered by **LLaMA 4 (via Groq)** and **LangChain**.
+
+![Screenshot](screenshot1.png,screenshot2.png)
 
 ---
 
 ## 🚀 Features
 
-- 📄 Upload and query **PDF documents**
-- 🌐 Enter any **website URL** and ask questions
-- 🧠 Powered by **Meta-LLaMA 4-Scout** model via Groq
-- 🧩 Chunking and embedding via **LangChain** and **HuggingFace**
-- 📦 Vector storage and similarity search using **FAISS**
-- 🖥️ Beautiful and dynamic **Streamlit interface**
-- 💾 Session state and error handling built-in
+- 📄 Upload and chat with **PDF documents**
+- 🌐 Enter a **website URL** and extract answers
+- 🧠 Uses **Meta LLaMA-4-Scout (17B)** via **Groq API**
+- 🔎 Embeds content using **HuggingFace embeddings**
+- 🗂️ Fast retrieval with **FAISS vector store**
+- 🖥️ Clean, modern **Streamlit UI**
+- 🌙 Light/Dark theme toggle
+- 💾 Remembers current session, avoids reprocessing
+- 🛡️ Error handling and safe parsing included
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Python 3.10+**
-- **Streamlit** – Frontend and user interaction
-- **LangChain** – Document loading, chaining, embedding
-- **HuggingFace Transformers** – Embeddings
-- **FAISS** – Vector similarity search
-- **Groq API** – For Meta-LLaMA 4 model
-- **BeautifulSoup4** – Web scraping
-- **PyMuPDF** – PDF parsing
+| Tool              | Purpose                            |
+|-------------------|------------------------------------|
+| Python 3.10+       | Programming language               |
+| Streamlit          | Web app UI                        |
+| LangChain          | Chaining + document loaders       |
+| HuggingFace        | Embeddings                        |
+| FAISS              | Vector similarity search          |
+| Groq               | Access to LLaMA 4 model           |
+| PyMuPDF            | PDF parsing                       |
+| BeautifulSoup4     | HTML scraping from websites       |
 
 ---
 
-## 📸 Demo
+## 📦 Installation
 
-![DocuBot Screenshot](screenshot.png)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/himikajain15/DocuBot.git
+   cd DocuBot
+2. **Install dependencies**
+  ```bash
+  pip install -r requirements.txt
 
----
+3. **Run the app**
 
-## ⚙️ Installation
-
-```bash
-git clone https://github.com/himikajain15/DocuBot.git
-cd DocuBot
-pip install -r requirements.txt
+  ```bash
+  streamlit run app.py
+**Get your Groq API Key**
+To use the LLaMA 4 model, you need a Groq API key.
+👉 Get it for free at https://console.groq.com/keys
