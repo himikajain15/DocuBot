@@ -101,7 +101,11 @@ def set_theme(dark=True):
                     color: #ffffff !important;
                 }
 
+<<<<<<< HEAD
                 /* ✅ FIX: Change drag-and-drop box background */
+=======
+
+>>>>>>> 849ecaa5ddfdceebf0b6ac584d905b8254566c40
                 div[data-testid="stFileUploader"] > div > div {
                     background-color: #e4d9ff !important;
                     color: #1e2749 !important;
