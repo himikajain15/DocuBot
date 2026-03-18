@@ -25,10 +25,16 @@ def get_groq_api_key():
         return os.getenv("GROQ_API_KEY", "")
 
 
-def set_theme(dark=True):
+def set_theme():
     st.markdown(
         """
         <style>
+            [data-testid="stHeader"] {
+                background: transparent !important;
+            }
+            [data-testid="stToolbar"] {
+                right: 1rem !important;
+            }
             body, .stApp {
                 background:
                     radial-gradient(circle at 18% 22%, rgba(18, 75, 34, 0.42), transparent 26%),
@@ -71,6 +77,14 @@ def set_theme(dark=True):
                 border-radius: 10px !important;
                 padding: 0.8rem !important;
             }
+            div[data-testid="stFileUploaderDropzone"] {
+                background-color: rgba(20, 20, 20, 0.88) !important;
+                color: #F2F3EA !important;
+                border: 2px dashed rgba(160, 194, 89, 0.55) !important;
+            }
+            div[data-testid="stFileUploaderDropzone"] * {
+                color: #F2F3EA !important;
+            }
             div[data-testid="stFileUploader"] label {
                 color: #F2F3EA !important;
             }
@@ -99,7 +113,7 @@ def set_theme(dark=True):
 
 
 st.set_page_config(page_title="DocuBot: Converse with Websites and PDFs", page_icon=":parrot:")
-st.title("📚🕵️DocuBot: Converse with Websites and PDFs")
+st.title("DocuBot: Converse with Websites and PDFs")
 
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
