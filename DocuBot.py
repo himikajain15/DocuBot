@@ -5,13 +5,15 @@ import tempfile
 import requests
 import streamlit as st
 from bs4 import BeautifulSoup
-from langchain.chains import RetrievalQA
 from langchain.docstore.document import Document
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
 from streamlit.errors import StreamlitSecretNotFoundError
 
 
@@ -211,11 +213,27 @@ if st.session_state.content_ready and st.session_state.vectorstore and st.sessio
     if st.button("Search") and query:
         with st.spinner("Generating answer..."):
             try:
-                qa_chain = RetrievalQA.from_chain_type(
-                    llm=st.session_state.llm,
-                    retriever=st.session_state.vectorstore.as_retriever(),
+                prompt = ChatPromptTemplate.from_messages(
+                    [
+                        (
+                            "system",
+                            "Use the given context to answer the question. "
+                            "If the answer is not in the context, say you do not know. "
+                            "Keep the answer concise.\n\nContext: {context}",
+                        ),
+                        ("human", "{input}"),
+                    ]
                 )
-                answer = qa_chain.run(query)
+                question_answer_chain = create_stuff_documents_chain(
+                    st.session_state.llm,
+                    prompt,
+                )
+                qa_chain = create_retrieval_chain(
+                    st.session_state.vectorstore.as_retriever(),
+                    question_answer_chain,
+                )
+                result = qa_chain.invoke({"input": query})
+                answer = result["answer"]
                 st.session_state.chat_history.append(f"You: {query}")
                 st.session_state.chat_history.append(f"Bot: {answer}")
                 st.success("Answer:")
