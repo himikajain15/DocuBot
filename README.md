@@ -1,6 +1,16 @@
 # DocuBot
 
-DocuBot is a Streamlit app that lets you chat with PDF files and website content using Groq and LangChain.
+DocuBot is a Streamlit app for chatting with website content and PDF files using Groq and LangChain.
+
+![DocuBot Screenshot](screenshot.png)
+
+## Features
+
+- Chat with a website by pasting its URL
+- Upload a PDF and ask questions about it
+- Groq-powered answers with retrieval over the loaded content
+- Sidebar chat history
+- Streamlit secrets support for `GROQ_API_KEY`
 
 ## Run locally
 
@@ -9,21 +19,27 @@ pip install -r requirements.txt
 streamlit run DocuBot.py
 ```
 
-## Deploy on Streamlit Community Cloud
+## Streamlit secrets
 
-1. Push this repo to GitHub.
-2. Open Streamlit Community Cloud and create a new app.
-3. Select this repository and branch.
-4. Set the main file path to `DocuBot.py`.
-5. In the app settings, add a secret:
+The app uses the Groq API key from Streamlit secrets, so users do not need to enter a key in the UI.
+
+Before deployment, add this in `.streamlit/secrets.toml` locally or in Streamlit Community Cloud secrets:
 
 ```toml
 GROQ_API_KEY = "your_groq_api_key_here"
 ```
 
-You can also copy [.streamlit/secrets.toml.example](/n:/Projects/Docubot/.streamlit/secrets.toml.example) when testing locally.
+## Deploy on Streamlit Community Cloud
 
-## Notes
+1. Push this repo to GitHub.
+2. Create a new app in Streamlit Community Cloud.
+3. Select this repository and branch.
+4. Set the main file path to `DocuBot.py`.
+5. Add `GROQ_API_KEY` in app secrets, and users can use the app without entering their own key.
 
-- This project is better suited to Streamlit Community Cloud than Vercel because the UI is a Streamlit app, not a serverless API.
-- The deployed app can accept either a website URL or a PDF upload.
+## Project files
+
+- `DocuBot.py` - main Streamlit app
+- `requirements.txt` - Python dependencies
+- `.streamlit/secrets.toml.example` - sample secrets file
+- `screenshot.png` - app preview
