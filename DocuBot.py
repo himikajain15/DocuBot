@@ -99,6 +99,12 @@ def set_theme():
             .stFileUploaderDropzone *,
             div[data-testid="stFileUploaderDropzone"] * {
                 color: #F2F3EA !important;
+                background: transparent !important;
+            }
+            div[data-testid="stFileUploaderDropzone"] > div,
+            div[data-testid="stFileUploaderDropzone"] > div > div,
+            div[data-testid="stFileUploaderDropzone"] > div > div > div {
+                background: transparent !important;
             }
             div[data-testid="stFileUploaderDropzone"] button,
             .stFileUploaderDropzone button {
