@@ -5,9 +5,9 @@ import tempfile
 import requests
 import streamlit as st
 from bs4 import BeautifulSoup
-from langchain.docstore.document import Document
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.documents import Document
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
