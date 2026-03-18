@@ -124,6 +124,15 @@ def set_theme():
             .stFileUploaderDropzone svg {
                 fill: #F2F3EA !important;
             }
+            /* Force all nested content inside the file uploader to be transparent and dark-themed */
+            div[data-testid="stFileUploader"] *,
+            div[data-testid="stFileUploaderDropzone"] *,
+            .stFileUploader *,
+            .stFileUploaderDropzone * {
+                background: transparent !important;
+                color: #F2F3EA !important;
+                border-color: rgba(160, 194, 89, 0.35) !important;
+            }
             .stFileUploader label,
             div[data-testid="stFileUploader"] label {
                 color: #F2F3EA !important;
