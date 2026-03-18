@@ -70,21 +70,55 @@ def set_theme():
                 color: #F2F3EA !important;
                 border-right: 1px solid rgba(242, 243, 234, 0.10) !important;
             }
-            div[data-testid="stFileUploader"] > div > div {
+            /* Streamlit file uploader styling (works across multiple Streamlit versions) */
+            .stFileUploader,
+            div[data-testid="stFileUploader"],
+            div[data-testid="stFileUploaderContainer"] {
+                width: 100% !important;
                 background-color: rgba(20, 20, 20, 0.88) !important;
                 color: #F2F3EA !important;
                 border: 2px dashed rgba(160, 194, 89, 0.55) !important;
                 border-radius: 10px !important;
                 padding: 0.8rem !important;
             }
+            .stFileUploaderDropzone,
             div[data-testid="stFileUploaderDropzone"] {
+                width: 100% !important;
+                min-height: 120px !important;
                 background-color: rgba(20, 20, 20, 0.88) !important;
                 color: #F2F3EA !important;
                 border: 2px dashed rgba(160, 194, 89, 0.55) !important;
+                border-radius: 10px !important;
+                padding: 0.8rem !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 1rem !important;
+                box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
             }
+            .stFileUploaderDropzone *,
             div[data-testid="stFileUploaderDropzone"] * {
                 color: #F2F3EA !important;
             }
+            div[data-testid="stFileUploaderDropzone"] button,
+            .stFileUploaderDropzone button {
+                background-color: rgba(242, 243, 234, 0.08) !important;
+                color: #F2F3EA !important;
+                border: 1px solid rgba(160, 194, 89, 0.35) !important;
+                border-radius: 0.5rem !important;
+                padding: 0.4rem 1rem !important;
+                min-width: 130px !important;
+                box-shadow: none !important;
+            }
+            div[data-testid="stFileUploaderDropzone"] button:hover,
+            .stFileUploaderDropzone button:hover {
+                background-color: rgba(242, 243, 234, 0.14) !important;
+            }
+            div[data-testid="stFileUploaderDropzone"] svg,
+            .stFileUploaderDropzone svg {
+                fill: #F2F3EA !important;
+            }
+            .stFileUploader label,
             div[data-testid="stFileUploader"] label {
                 color: #F2F3EA !important;
             }
