@@ -5,10 +5,7 @@ import tempfile
 import requests
 import streamlit as st
 from bs4 import BeautifulSoup
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_groq import ChatGroq
@@ -213,27 +210,17 @@ if st.session_state.content_ready and st.session_state.vectorstore and st.sessio
     if st.button("Search") and query:
         with st.spinner("Generating answer..."):
             try:
-                prompt = ChatPromptTemplate.from_messages(
-                    [
-                        (
-                            "system",
-                            "Use the given context to answer the question. "
-                            "If the answer is not in the context, say you do not know. "
-                            "Keep the answer concise.\n\nContext: {context}",
-                        ),
-                        ("human", "{input}"),
-                    ]
+                retrieved_docs = st.session_state.vectorstore.similarity_search(query, k=4)
+                context = "\n\n".join(doc.page_content for doc in retrieved_docs)
+                prompt = (
+                    "You are answering questions using only the provided context.\n"
+                    "If the answer is not present in the context, say you do not know.\n"
+                    "Keep the answer concise and clear.\n\n"
+                    f"Context:\n{context}\n\n"
+                    f"Question: {query}"
                 )
-                question_answer_chain = create_stuff_documents_chain(
-                    st.session_state.llm,
-                    prompt,
-                )
-                qa_chain = create_retrieval_chain(
-                    st.session_state.vectorstore.as_retriever(),
-                    question_answer_chain,
-                )
-                result = qa_chain.invoke({"input": query})
-                answer = result["answer"]
+                response = st.session_state.llm.invoke(prompt)
+                answer = response.content if hasattr(response, "content") else str(response)
                 st.session_state.chat_history.append(f"You: {query}")
                 st.session_state.chat_history.append(f"Bot: {answer}")
                 st.success("Answer:")
