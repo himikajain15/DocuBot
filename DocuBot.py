@@ -113,7 +113,7 @@ def set_theme():
 
 
 st.set_page_config(page_title="DocuBot: Converse with Websites and PDFs", page_icon=":parrot:")
-st.title("DocuBot: Converse with Websites and PDFs")
+st.title("📚🕵️DocuBot: Converse with Websites and PDFs")
 
 if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
