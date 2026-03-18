@@ -1,161 +1,151 @@
-import streamlit as st
-import requests
-from bs4 import BeautifulSoup
 import logging
+import os
 import tempfile
 
-from langchain.docstore.document import Document
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import PyPDFLoader
+import requests
+import streamlit as st
+from bs4 import BeautifulSoup
 from langchain.chains import RetrievalQA
+from langchain.docstore.document import Document
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import FAISS
 from langchain_groq import ChatGroq
+from streamlit.errors import StreamlitSecretNotFoundError
 
-# Logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Streamlit config
-st.set_page_config(page_title="DocuBot: Converse with Websites & PDFs", page_icon="🦜")
-st.title("📚🕵️ DocuBot: Converse with Websites & PDFs")
 
-# Sidebar: API key and theme toggle
-with st.sidebar:
-    groq_api_key = st.text_input("Groq API Key", type="password")
-    dark_mode = st.toggle("🌙 Dark Mode", value=True)
+def get_groq_api_key():
+    try:
+        return st.secrets.get("GROQ_API_KEY", "") or os.getenv("GROQ_API_KEY", "")
+    except StreamlitSecretNotFoundError:
+        return os.getenv("GROQ_API_KEY", "")
 
-# Inject CSS for dark/light theme
-# Inject custom CSS for dark/light theme
-# THEME FUNCTION: Dark theme (full black)
+
 def set_theme(dark=True):
-    if dark:
-        st.markdown("""
-            <style>
-                body, .stApp {
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                }
-                .block-container {
-                    background-color: #000000 !important;
-                }
-                .stTextInput > div > div > input,
-                .stTextArea > div > textarea,
-                .stTextInput input {
-                    background-color: #1a1a1a !important;
-                    color: #ffffff !important;
-                    border: 1px solid #333333 !important;
-                }
-                .stTextInput label, .stFileUploader label, .stTextArea label {
-                    color: #ffffff !important;
-                }
-                .stButton > button {
-                    background-color: #333333 !important;
-                    color: #ffffff !important;
-                    border: 1px solid #ffffff !important;
-                }
-                section[data-testid="stSidebar"] {
-                    background-color: #000000 !important;
-                    color: #ffffff !important;
-                }
-                div[data-testid="stFileUploader"] > div > div {
-                    background-color: #1a1a1a !important;
-                    color: #ffffff !important;
-                    border: 2px dashed #555 !important;
-                    border-radius: 10px !important;
-                    padding: 1rem !important;
-                }
-                div[data-testid="stFileUploader"] label {
-                    color: #ffffff !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
+    st.markdown(
+        """
+        <style>
+            body, .stApp {
+                background:
+                    radial-gradient(circle at 18% 22%, rgba(18, 75, 34, 0.42), transparent 26%),
+                    radial-gradient(circle at 62% 52%, rgba(82, 110, 38, 0.18), transparent 24%),
+                    radial-gradient(circle at 78% 70%, rgba(116, 145, 70, 0.16), transparent 22%),
+                    #141414 !important;
+                color: #F2F3EA !important;
+            }
+            .block-container {
+                background-color: transparent !important;
+                padding-top: 1.8rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+            .stTextInput > div > div > input,
+            .stTextArea > div > textarea,
+            .stTextInput input {
+                background-color: rgba(20, 20, 20, 0.92) !important;
+                color: #F2F3EA !important;
+                border: 1px solid rgba(160, 194, 89, 0.45) !important;
+            }
+            .stTextInput label, .stFileUploader label, .stTextArea label {
+                color: #F2F3EA !important;
+            }
+            .stButton > button {
+                background: linear-gradient(135deg, #5f8d37, #7ea34b) !important;
+                color: #F2F3EA !important;
+                border: 1px solid rgba(242, 243, 234, 0.55) !important;
+            }
+            section[data-testid="stSidebar"] {
+                background:
+                    radial-gradient(circle at 20% 18%, rgba(18, 75, 34, 0.50), transparent 24%),
+                    #141414 !important;
+                color: #F2F3EA !important;
+                border-right: 1px solid rgba(242, 243, 234, 0.10) !important;
+            }
+            div[data-testid="stFileUploader"] > div > div {
+                background-color: rgba(20, 20, 20, 0.88) !important;
+                color: #F2F3EA !important;
+                border: 2px dashed rgba(160, 194, 89, 0.55) !important;
+                border-radius: 10px !important;
+                padding: 0.8rem !important;
+            }
+            div[data-testid="stFileUploader"] label {
+                color: #F2F3EA !important;
+            }
+            .stMarkdown, p, h1, h2, h3, label, span, div {
+                color: #F2F3EA !important;
+            }
+            div[data-testid="stAlert"] {
+                background-color: rgba(20, 20, 20, 0.88) !important;
+                color: #F2F3EA !important;
+                border: 1px solid rgba(160, 194, 89, 0.35) !important;
+            }
+            h1 {
+                margin-top: 0 !important;
+                margin-bottom: 1rem !important;
+                font-size: 3.4rem !important;
+                line-height: 1.05 !important;
+            }
+            div[data-testid="stSidebar"] .block-container {
+                padding-top: 1rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    else:
-        st.markdown("""
-            <style>
-                body, .stApp {
-                    background-color: #bdbbb0 !important;
-                    color: #353535 !important;
-                }
-                .block-container {
-                    background-color: #bdbbb0 !important;
-                }
-                .stTextInput > div > div > input,
-                .stTextArea > div > textarea,
-                .stTextInput input {
-                    background-color: #ffffff !important;
-                    color: #353535 !important;
-                    border: 1px solid #8a897c !important;
-                }
-                .stTextInput label, .stFileUploader label, .stTextArea label {
-                    color: #353535 !important;
-                }
-                .stButton > button {
-                    background-color: #8a897c !important;
-                    color: #ffffff !important;
-                    border: 1px solid #bdbbb0 !important;
-                }
-                section[data-testid="stSidebar"] {
-                    background-color: #8a897c !important;
-                    color: #ffffff !important;
-                }
 
-<<<<<<< HEAD
-                /* ✅ FIX: Change drag-and-drop box background */
-=======
+st.set_page_config(page_title="DocuBot: Converse with Websites and PDFs", page_icon=":parrot:")
+st.title("📚🕵️DocuBot: Converse with Websites and PDFs")
 
->>>>>>> 849ecaa5ddfdceebf0b6ac584d905b8254566c40
-                div[data-testid="stFileUploader"] > div > div {
-                    background-color: #e4d9ff !important;
-                    color: #1e2749 !important;
-                    border: 2px dashed #1e2749 !important;
-                    border-radius: 10px !important;
-                    padding: 1rem !important;
-                }
-                div[data-testid="stFileUploader"] label {
-                    color: #353535 !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-
-set_theme(dark_mode)
-
-# Session state setup
-if 'vectorstore' not in st.session_state:
+if "vectorstore" not in st.session_state:
     st.session_state.vectorstore = None
-if 'llm' not in st.session_state:
+if "llm" not in st.session_state:
     st.session_state.llm = None
-if 'content_ready' not in st.session_state:
+if "content_ready" not in st.session_state:
     st.session_state.content_ready = False
-if 'last_input' not in st.session_state:
+if "last_input" not in st.session_state:
     st.session_state.last_input = ""
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 
-# Inputs
+with st.sidebar:
+    st.subheader("Chat History")
+    if st.session_state.chat_history:
+        for item in st.session_state.chat_history:
+            st.write(item)
+    else:
+        st.caption("No chat yet.")
+
+set_theme()
+groq_api_key = get_groq_api_key()
+
 generic_url = st.text_input("Enter a Website URL")
 uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
-current_input = (generic_url or uploaded_file.name if uploaded_file else "")
+current_input = generic_url or (uploaded_file.name if uploaded_file else "")
 
-# Detect new input
 if current_input != st.session_state.last_input:
     st.session_state.content_ready = False
     st.session_state.last_input = current_input
 
-# Load website content safely
+
 def fetch_website_text(url):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
-        text = soup.get_text(separator="\n")
-        return text
-    except Exception as e:
-        logger.error(f"Website error: {e}")
-        st.error(f"Failed to load website: {e}")
+        return soup.get_text(separator="\n")
+    except Exception as exc:
+        logger.error(f"Website error: {exc}")
+        st.error(f"Failed to load website: {exc}")
         return None
 
-# Load PDF content safely
+
 def fetch_pdf_docs(uploaded):
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
@@ -164,23 +154,22 @@ def fetch_pdf_docs(uploaded):
 
         loader = PyPDFLoader(tmp_file_path)
         return loader.load()
-    except Exception as e:
-        logger.error(f"PDF error: {e}")
-        st.error(f"Failed to read PDF: {e}")
+    except Exception as exc:
+        logger.error(f"PDF error: {exc}")
+        st.error(f"Failed to read PDF: {exc}")
         return None
 
-# Process on button click
+
 if not st.session_state.content_ready:
-    if st.button("Analyze 🌐"):
+    if st.button("Analyze"):
         if not groq_api_key.strip():
-            st.error("Please enter your Groq API Key.")
+            st.error("Please add your Groq API key in Streamlit secrets.")
         elif not generic_url and not uploaded_file:
             st.error("Please provide a website URL or upload a PDF.")
         else:
             documents = []
 
             with st.spinner("Processing..."):
-                # Website
                 if generic_url:
                     text = fetch_website_text(generic_url)
                     if text:
@@ -190,11 +179,10 @@ if not st.session_state.content_ready:
                             Document(page_content=chunk, metadata={"source": generic_url})
                             for chunk in chunks
                         )
-                        st.success(f"Loaded content from URL.")
+                        st.success("Loaded content from URL.")
                     else:
                         st.stop()
 
-                # PDF
                 if uploaded_file:
                     pdf_docs = fetch_pdf_docs(uploaded_file)
                     if pdf_docs:
@@ -203,7 +191,6 @@ if not st.session_state.content_ready:
                     else:
                         st.stop()
 
-                # Embed and store
                 if documents:
                     try:
                         embeddings = HuggingFaceEmbeddings()
@@ -211,26 +198,27 @@ if not st.session_state.content_ready:
                         st.session_state.vectorstore = vectorstore
                         st.session_state.llm = ChatGroq(
                             model="Meta-Llama/Llama-4-Scout-17b-16e-Instruct",
-                            api_key=groq_api_key
+                            api_key=groq_api_key,
                         )
                         st.session_state.content_ready = True
-                        st.success("✅ Content ready. You can now ask questions.")
-                    except Exception as e:
-                        st.error(f"Vector store setup failed: {e}")
+                        st.success("Content ready. You can now ask questions.")
+                    except Exception as exc:
+                        st.error(f"Vector store setup failed: {exc}")
                         st.stop()
 
-# Ask questions
 if st.session_state.content_ready and st.session_state.vectorstore and st.session_state.llm:
     query = st.text_input("Ask a question based on the document/website:")
-    if st.button("🔍 Search") and query:
+    if st.button("Search") and query:
         with st.spinner("Generating answer..."):
             try:
                 qa_chain = RetrievalQA.from_chain_type(
                     llm=st.session_state.llm,
-                    retriever=st.session_state.vectorstore.as_retriever()
+                    retriever=st.session_state.vectorstore.as_retriever(),
                 )
                 answer = qa_chain.run(query)
+                st.session_state.chat_history.append(f"You: {query}")
+                st.session_state.chat_history.append(f"Bot: {answer}")
                 st.success("Answer:")
                 st.write(answer)
-            except Exception as e:
-                st.error(f"Failed to generate answer: {e}")
+            except Exception as exc:
+                st.error(f"Failed to generate answer: {exc}")
