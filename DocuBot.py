@@ -175,11 +175,17 @@ if "last_input" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
+def _summarize_chat_item(item: str, max_chars: int = 80) -> str:
+    """Return a short headline-style preview of a chat message."""
+    if len(item) <= max_chars:
+        return item
+    return item[: max_chars - 3].rstrip() + "..."
+
 with st.sidebar:
     st.subheader("Chat History")
     if st.session_state.chat_history:
         for item in st.session_state.chat_history:
-            st.write(item)
+            st.write(_summarize_chat_item(item))
     else:
         st.caption("No chat yet.")
 
